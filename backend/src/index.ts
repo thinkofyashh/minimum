@@ -10,11 +10,25 @@ type Bindings = {
 
 const app = new Hono<{ Bindings: Bindings }>()
 
-app.get('/', (c) => {
+app.post('/', async(c) => {
   const prisma = new PrismaClient({
     datasourceUrl: c.env.DATABASE_URL,
 }).$extends(withAccelerate())
-  return c.text('Hello Hono!')
+
+const user = await prisma.user.create({
+  data: {
+    name: 'Test User',
+    email: 'test@example.com',
+  },
+})
+const users = await prisma.user.findMany()
+
+return c.json({ message: 'User created!', created: user, allUsers: users })
+
+
+
+
+ // return c.text('Hello Hono!')
 })
 
 export default app
